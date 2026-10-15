@@ -1,0 +1,51 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "codeplag"
+version = "0.1.0"
+description = "Code plagiarism detection using semantic tree analysis and neural embeddings"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+dependencies = [
+  "torch>=2.2",
+  "transformers>=4.40",
+  "tree-sitter>=0.22",
+  "tree-sitter-python",
+  "tree-sitter-java",
+  "tree-sitter-javascript",
+  "numpy",
+  "scikit-learn",
+  "networkx",
+  "zss",              # Zhang-Shasha tree edit distance
+  "pydantic>=2",
+  "pyyaml",
+  "typer",
+  "tqdm",
+]
+
+[project.optional-dependencies]
+dev = ["pytest", "pytest-cov", "ruff", "mypy", "pre-commit", "jupyterlab", "types-PyYAML"]
+
+[project.scripts]
+codeplag = "codeplag.cli.main:app"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q --cov=codeplag --cov-report=term-missing"
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true

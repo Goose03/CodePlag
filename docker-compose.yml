@@ -1,0 +1,26 @@
+services:
+  codeplag:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: codeplag:latest
+    env_file: .env
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - hf_cache:/app/.cache/huggingface
+
+  dev:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dev
+    env_file: .env
+    volumes:
+      - .:/workspace
+    working_dir: /workspace
+    profiles: ["dev"]
+    tty: true
+    stdin_open: true
+
+volumes:
+  hf_cache:
