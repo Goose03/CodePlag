@@ -33,7 +33,7 @@ Early development. The repository structure, tooling, and containers are in plac
 ## Installation
 
 ```bash
-git clone <repo-url> codeplag
+git clone https://github.com/Goose03/CodePlag codeplag
 cd codeplag
 
 python3.12 -m venv .venv
