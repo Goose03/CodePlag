@@ -1,0 +1,143 @@
+{
+  "primary": {
+    "archive": "Project_CodeNet_Python800.tar.gz",
+    "files_in_archive": 240000,
+    "problems_loaded": 800,
+    "files_kept_after_cleaning": 223803,
+    "dropped": {
+      "too_large": 76,
+      "too_short": 11677,
+      "parse_error": 4051,
+      "duplicate": 393
+    },
+    "files_sampled": 32000,
+    "bytes_median": 251.0,
+    "lines_median": 12.0,
+    "lines_mean": 16.0
+  },
+  "split_problems": {
+    "train": 560,
+    "val": 120,
+    "test": 120
+  },
+  "unseen": {
+    "archive": "Project_CodeNet_Java250.tar.gz",
+    "problems_total": 250,
+    "files_in_archive": 75000,
+    "problems_loaded": 100,
+    "files_kept_after_cleaning": 29853,
+    "dropped": {
+      "too_large": 128,
+      "too_short": 19
+    },
+    "files_sampled": 4000,
+    "bytes_median": 615.5,
+    "lines_median": 24.0,
+    "lines_mean": 33.34
+  },
+  "pairs": {
+    "train": {
+      "pairs": 24000,
+      "positives": 12000,
+      "negatives": 12000,
+      "kinds": {
+        "different_problem": 12000,
+        "same_problem": 6000,
+        "synthetic": 6000
+      },
+      "transforms": {
+        "comments": 1789,
+        "expr_rewrite": 1240,
+        "rename": 1817,
+        "dead_code": 1762,
+        "reorder": 565,
+        "loop_swap": 793
+      }
+    },
+    "val": {
+      "pairs": 4000,
+      "positives": 2000,
+      "negatives": 2000,
+      "kinds": {
+        "synthetic": 1000,
+        "different_problem": 2000,
+        "same_problem": 1000
+      },
+      "transforms": {
+        "rename": 289,
+        "loop_swap": 138,
+        "reorder": 101,
+        "dead_code": 308,
+        "comments": 271,
+        "expr_rewrite": 200
+      }
+    },
+    "test": {
+      "pairs": 4000,
+      "positives": 2000,
+      "negatives": 2000,
+      "kinds": {
+        "synthetic": 1000,
+        "different_problem": 2000,
+        "same_problem": 1000
+      },
+      "transforms": {
+        "dead_code": 300,
+        "expr_rewrite": 192,
+        "rename": 320,
+        "reorder": 93,
+        "comments": 295,
+        "loop_swap": 125
+      }
+    },
+    "hard_obfuscation": {
+      "pairs": 500,
+      "positives": 500,
+      "negatives": 0,
+      "kinds": {
+        "hard_obfuscation": 500
+      },
+      "transforms": {
+        "rename": 500,
+        "expr_rewrite": 432,
+        "loop_swap": 314,
+        "dead_code": 500,
+        "comments": 500,
+        "reorder": 238
+      }
+    },
+    "hard_equivalent": {
+      "pairs": 500,
+      "positives": 500,
+      "negatives": 0,
+      "kinds": {
+        "hard_equivalent": 500
+      },
+      "transforms": {}
+    },
+    "hard_boilerplate": {
+      "pairs": 500,
+      "positives": 0,
+      "negatives": 500,
+      "kinds": {
+        "hard_boilerplate": 500
+      },
+      "transforms": {}
+    },
+    "unseen_java": {
+      "pairs": 2000,
+      "positives": 1000,
+      "negatives": 1000,
+      "kinds": {
+        "synthetic": 500,
+        "different_problem": 1000,
+        "same_problem": 500
+      },
+      "transforms": {
+        "rename": 234,
+        "dead_code": 262,
+        "comments": 249
+      }
+    }
+  }
+}
