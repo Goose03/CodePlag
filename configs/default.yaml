@@ -1,0 +1,71 @@
+# Default configuration for codeplag.
+# Environment variables override: CODEPLAG_DEVICE, CODEPLAG_MODEL_NAME, CODEPLAG_LOG_LEVEL.
+seed: 42
+log_level: INFO
+
+paths:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  checkpoints_dir: models/checkpoints
+  combiner_path: models/checkpoints/combiner.json
+  results_dir: docs/results
+  cache_dir: data/processed/cache
+
+ast:
+  max_nodes: 250             # trees above this size are depth-pruned before tree edit distance
+  canonicalize_constructs: true
+  min_subtree_size: 4
+  ngram_size: 3
+  weights: {ted: 0.4, subtree: 0.3, ngram: 0.3}
+  top_matches: 5
+
+neural:
+  model_name: microsoft/unixcoder-base
+  device: cpu                # cpu | cuda
+  max_length: 256
+  projection_dim: 256
+  head: mlp                  # mlp on [u, v, |u-v|, u*v] | cosine
+  freeze_layers: 6           # freeze embeddings + first 6 of 12 encoder layers
+  checkpoint_name: best.pt
+  embed_batch_size: 32
+
+train:
+  epochs: 4
+  batch_size: 16
+  learning_rate: 2.0e-5
+  head_learning_rate: 1.0e-3
+  weight_decay: 0.01
+  warmup_ratio: 0.06
+  patience: 2
+  max_train_pairs: null      # cap the number of training pairs (e.g. 4000 on CPU)
+  train_eval_pairs: 2000
+  fp16: true                 # only used on cuda
+  num_workers: 0
+
+data:
+  primary_archive: Project_CodeNet_Python800.tar.gz
+  unseen_archive: Project_CodeNet_Java250.tar.gz
+  split_ratios: [0.70, 0.15, 0.15]
+  files_per_problem: 40
+  max_file_bytes: 6000
+  min_file_lines: 3
+  pairs: {train: 24000, val: 4000, test: 4000}
+  synthetic_fraction: 0.5
+  hard_pairs_per_suite: 500
+  unseen_pairs: 2000
+  unseen_problems: 100
+
+combiner:
+  method: logistic           # logistic | weighted
+  weights: {ast: 0.5, neural: 0.5}
+  threshold: 0.5             # overwritten by the threshold fitted on the validation split
+  max_fpr: 0.05
+
+scan:
+  prefilter: minhash         # minhash | embedding | none
+  num_perm: 64
+  bands: 32                  # 32 bands x 2 rows: ~50% collision at Jaccard 0.18
+  top_k: 10
+  min_candidates_for_prefilter: 20
+  workers: 0                 # processes for AST comparisons (0 = cores - 1)
+  parallel_min_pairs: 64
