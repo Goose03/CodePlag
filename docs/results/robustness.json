@@ -1,0 +1,400 @@
+{
+  "hard_obfuscation": {
+    "ast_only": {
+      "at_threshold": {
+        "n": 500.0,
+        "threshold": 0.5643218686612452,
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "fpr": 0.0,
+        "roc_auc": null,
+        "pr_auc": null,
+        "tn": 0.0,
+        "fp": 0.0,
+        "fn": 0.0,
+        "tp": 500.0
+      },
+      "vs_test_opposite_class": {
+        "n": 2500.0,
+        "threshold": 0.5643218686612452,
+        "accuracy": 0.9652,
+        "precision": 0.8517887563884157,
+        "recall": 1.0,
+        "f1": 0.9199632014719411,
+        "fpr": 0.0435,
+        "roc_auc": 0.999871,
+        "pr_auc": 0.9995163105302229,
+        "tn": 1913.0,
+        "fp": 87.0,
+        "fn": 0.0,
+        "tp": 500.0
+      }
+    },
+    "neural_only": {
+      "at_threshold": {
+        "n": 500.0,
+        "threshold": 0.11233222378512804,
+        "accuracy": 0.996,
+        "precision": 1.0,
+        "recall": 0.996,
+        "f1": 0.9979959919839679,
+        "fpr": 0.0,
+        "roc_auc": null,
+        "pr_auc": null,
+        "tn": 0.0,
+        "fp": 0.0,
+        "fn": 2.0,
+        "tp": 498.0
+      },
+      "vs_test_opposite_class": {
+        "n": 2500.0,
+        "threshold": 0.11233222378512804,
+        "accuracy": 0.9604,
+        "precision": 0.8369747899159664,
+        "recall": 0.996,
+        "f1": 0.9095890410958904,
+        "fpr": 0.0485,
+        "roc_auc": 0.996811,
+        "pr_auc": 0.9861672109174849,
+        "tn": 1903.0,
+        "fp": 97.0,
+        "fn": 2.0,
+        "tp": 498.0
+      }
+    },
+    "combined": {
+      "at_threshold": {
+        "n": 500.0,
+        "threshold": 0.17657059265507694,
+        "accuracy": 1.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "fpr": 0.0,
+        "roc_auc": null,
+        "pr_auc": null,
+        "tn": 0.0,
+        "fp": 0.0,
+        "fn": 0.0,
+        "tp": 500.0
+      },
+      "vs_test_opposite_class": {
+        "n": 2500.0,
+        "threshold": 0.17657059265507694,
+        "accuracy": 0.9604,
+        "precision": 0.8347245409015025,
+        "recall": 1.0,
+        "f1": 0.9099181073703366,
+        "fpr": 0.0495,
+        "roc_auc": 0.9998940000000001,
+        "pr_auc": 0.9996021659092351,
+        "tn": 1901.0,
+        "fp": 99.0,
+        "fn": 0.0,
+        "tp": 500.0
+      }
+    }
+  },
+  "hard_equivalent": {
+    "ast_only": {
+      "at_threshold": {
+        "n": 500.0,
+        "threshold": 0.5643218686612452,
+        "accuracy": 0.114,
+        "precision": 1.0,
+        "recall": 0.114,
+        "f1": 0.2046678635547576,
+        "fpr": 0.0,
+        "roc_auc": null,
+        "pr_auc": null,
+        "tn": 0.0,
+        "fp": 0.0,
+        "fn": 443.0,
+        "tp": 57.0
+      },
+      "vs_test_opposite_class": {
+        "n": 2500.0,
+        "threshold": 0.5643218686612452,
+        "accuracy": 0.788,
+        "precision": 0.3958333333333333,
+        "recall": 0.114,
+        "f1": 0.17701863354037264,
+        "fpr": 0.0435,
+        "roc_auc": 0.6253115,
+        "pr_auc": 0.30199264971295214,
+        "tn": 1913.0,
+        "fp": 87.0,
+        "fn": 443.0,
+        "tp": 57.0
+      }
+    },
+    "neural_only": {
+      "at_threshold": {
+        "n": 500.0,
+        "threshold": 0.11233222378512804,
+        "accuracy": 0.682,
+        "precision": 1.0,
+        "recall": 0.682,
+        "f1": 0.8109393579072534,
+        "fpr": 0.0,
+        "roc_auc": null,
+        "pr_auc": null,
+        "tn": 0.0,
+        "fp": 0.0,
+        "fn": 159.0,
+        "tp": 341.0
+      },
+      "vs_test_opposite_class": {
+        "n": 2500.0,
+        "threshold": 0.11233222378512804,
+        "accuracy": 0.8976,
+        "precision": 0.7785388127853882,
+        "recall": 0.682,
+        "f1": 0.7270788912579957,
+        "fpr": 0.0485,
+        "roc_auc": 0.9534090000000001,
+        "pr_auc": 0.8473410572903494,
+        "tn": 1903.0,
+        "fp": 97.0,
+        "fn": 159.0,
+        "tp": 341.0
+      }
+    },
+    "combined": {
+      "at_threshold": {
+        "n": 500.0,
+        "threshold": 0.17657059265507694,
+        "accuracy": 0.664,
+        "precision": 1.0,
+        "recall": 0.664,
+        "f1": 0.798076923076923,
+        "fpr": 0.0,
+        "roc_auc": null,
+        "pr_auc": null,
+        "tn": 0.0,
+        "fp": 0.0,
+        "fn": 168.0,
+        "tp": 332.0
+      },
+      "vs_test_opposite_class": {
+        "n": 2500.0,
+        "threshold": 0.17657059265507694,
+        "accuracy": 0.8932,
+        "precision": 0.7703016241299304,
+        "recall": 0.664,
+        "f1": 0.7132116004296456,
+        "fpr": 0.0495,
+        "roc_auc": 0.867719,
+        "pr_auc": 0.7141622790915796,
+        "tn": 1901.0,
+        "fp": 99.0,
+        "fn": 168.0,
+        "tp": 332.0
+      }
+    }
+  },
+  "hard_boilerplate": {
+    "ast_only": {
+      "at_threshold": {
+        "n": 500.0,
+        "threshold": 0.5643218686612452,
+        "accuracy": 0.074,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.926,
+        "roc_auc": null,
+        "pr_auc": null,
+        "tn": 37.0,
+        "fp": 463.0,
+        "fn": 0.0,
+        "tp": 0.0
+      },
+      "vs_test_opposite_class": {
+        "n": 2500.0,
+        "threshold": 0.5643218686612452,
+        "accuracy": 0.652,
+        "precision": 0.7748054474708171,
+        "recall": 0.7965,
+        "f1": 0.7855029585798816,
+        "fpr": 0.926,
+        "roc_auc": 0.633222,
+        "pr_auc": 0.9067659902666679,
+        "tn": 37.0,
+        "fp": 463.0,
+        "fn": 407.0,
+        "tp": 1593.0
+      }
+    },
+    "neural_only": {
+      "at_threshold": {
+        "n": 500.0,
+        "threshold": 0.11233222378512804,
+        "accuracy": 0.886,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.114,
+        "roc_auc": null,
+        "pr_auc": null,
+        "tn": 443.0,
+        "fp": 57.0,
+        "fn": 0.0,
+        "tp": 0.0
+      },
+      "vs_test_opposite_class": {
+        "n": 2500.0,
+        "threshold": 0.11233222378512804,
+        "accuracy": 0.9368,
+        "precision": 0.9708588957055214,
+        "recall": 0.9495,
+        "f1": 0.9600606673407482,
+        "fpr": 0.114,
+        "roc_auc": 0.9779035,
+        "pr_auc": 0.9940340039059903,
+        "tn": 443.0,
+        "fp": 57.0,
+        "fn": 101.0,
+        "tp": 1899.0
+      }
+    },
+    "combined": {
+      "at_threshold": {
+        "n": 500.0,
+        "threshold": 0.17657059265507694,
+        "accuracy": 0.224,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "fpr": 0.776,
+        "roc_auc": null,
+        "pr_auc": null,
+        "tn": 112.0,
+        "fp": 388.0,
+        "fn": 0.0,
+        "tp": 0.0
+      },
+      "vs_test_opposite_class": {
+        "n": 2500.0,
+        "threshold": 0.17657059265507694,
+        "accuracy": 0.81,
+        "precision": 0.8313776618861365,
+        "recall": 0.9565,
+        "f1": 0.889560567309928,
+        "fpr": 0.776,
+        "roc_auc": 0.9319979999999999,
+        "pr_auc": 0.9839504108161992,
+        "tn": 112.0,
+        "fp": 388.0,
+        "fn": 87.0,
+        "tp": 1913.0
+      }
+    }
+  },
+  "unseen_java": {
+    "ast_only": {
+      "at_threshold": {
+        "n": 2000.0,
+        "threshold": 0.5643218686612452,
+        "accuracy": 0.7765,
+        "precision": 0.7630827783063748,
+        "recall": 0.802,
+        "f1": 0.7820575329107753,
+        "fpr": 0.249,
+        "roc_auc": 0.8660869999999999,
+        "pr_auc": 0.9043645827101212,
+        "tn": 751.0,
+        "fp": 249.0,
+        "fn": 198.0,
+        "tp": 802.0
+      },
+      "at_threshold_by_kind": {
+        "different_problem": {
+          "n": 1000.0,
+          "fpr": 0.249,
+          "mean_score": 0.37002519302943515
+        },
+        "same_problem": {
+          "n": 500.0,
+          "recall": 0.604,
+          "mean_score": 0.6301762173650597
+        },
+        "synthetic": {
+          "n": 500.0,
+          "recall": 1.0,
+          "mean_score": 0.99897096322791
+        }
+      }
+    },
+    "neural_only": {
+      "at_threshold": {
+        "n": 2000.0,
+        "threshold": 0.11233222378512804,
+        "accuracy": 0.9135,
+        "precision": 0.9002904162633107,
+        "recall": 0.93,
+        "f1": 0.9149040826364979,
+        "fpr": 0.103,
+        "roc_auc": 0.975438,
+        "pr_auc": 0.9785875120199637,
+        "tn": 897.0,
+        "fp": 103.0,
+        "fn": 70.0,
+        "tp": 930.0
+      },
+      "at_threshold_by_kind": {
+        "different_problem": {
+          "n": 1000.0,
+          "fpr": 0.103,
+          "mean_score": 0.11520046358749934
+        },
+        "same_problem": {
+          "n": 500.0,
+          "recall": 0.862,
+          "mean_score": 0.8157230652835056
+        },
+        "synthetic": {
+          "n": 500.0,
+          "recall": 0.998,
+          "mean_score": 0.962120679389192
+        }
+      }
+    },
+    "combined": {
+      "at_threshold": {
+        "n": 2000.0,
+        "threshold": 0.17657059265507694,
+        "accuracy": 0.889,
+        "precision": 0.8517179023508138,
+        "recall": 0.942,
+        "f1": 0.8945868945868947,
+        "fpr": 0.164,
+        "roc_auc": 0.9576769999999998,
+        "pr_auc": 0.9698324017788703,
+        "tn": 836.0,
+        "fp": 164.0,
+        "fn": 58.0,
+        "tp": 942.0
+      },
+      "at_threshold_by_kind": {
+        "different_problem": {
+          "n": 1000.0,
+          "fpr": 0.164,
+          "mean_score": 0.14037171543829358
+        },
+        "same_problem": {
+          "n": 500.0,
+          "recall": 0.884,
+          "mean_score": 0.8126931947202356
+        },
+        "synthetic": {
+          "n": 500.0,
+          "recall": 1.0,
+          "mean_score": 0.9980863309510559
+        }
+      }
+    }
+  }
+}

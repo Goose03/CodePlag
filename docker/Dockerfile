@@ -20,7 +20,8 @@ RUN useradd --create-home --uid 1000 appuser
 COPY --from=builder /opt/venv /opt/venv
 WORKDIR /app
 COPY configs ./configs
-RUN mkdir -p /app/data /app/models /app/.cache && chown -R appuser:appuser /app
+RUN mkdir -p /app/data /app/models/checkpoints /app/.cache/huggingface \
+    && chown -R appuser:appuser /app
 USER appuser
 ENTRYPOINT ["codeplag"]
 CMD ["--help"]

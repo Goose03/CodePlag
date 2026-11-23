@@ -1,0 +1,105 @@
+{
+  "hardware": {
+    "platform": "Windows-11-10.0.26300-SP0",
+    "processor": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "logical_cpus": 16,
+    "ram_gb": 31.7,
+    "torch": "2.14.1+cu126",
+    "torch_threads": 2,
+    "cuda": false
+  },
+  "scan_workers": 4,
+  "scan_device": "openvino-gpu",
+  "ast_latency": {
+    "mean_ms": 144.062,
+    "p50_ms": 78.842,
+    "p95_ms": 480.211,
+    "n": 200
+  },
+  "neural_latency": {
+    "openvino-gpu": {
+      "mean_ms": 117.267,
+      "p50_ms": 127.012,
+      "p95_ms": 178.992,
+      "n": 100,
+      "batched_pairs_per_s": 8.99
+    }
+  },
+  "rss_mib_before_benchmarks": 2903.1,
+  "rss_mib_before_scan": 3361.6,
+  "scan": [
+    {
+      "files": 24,
+      "prefilter": "none",
+      "total_pairs": 276,
+      "candidate_pairs": 276,
+      "seconds": 24.984,
+      "pairs_per_s": 11.05,
+      "files_per_s": 0.96,
+      "prefilter_recall_on_links": 1.0,
+      "detected_links": 1.0,
+      "flagged_pairs": 46
+    },
+    {
+      "files": 24,
+      "prefilter": "minhash",
+      "total_pairs": 276,
+      "candidate_pairs": 38,
+      "seconds": 9.283,
+      "pairs_per_s": 4.09,
+      "files_per_s": 2.59,
+      "prefilter_recall_on_links": 1.0,
+      "detected_links": 1.0,
+      "flagged_pairs": 18
+    },
+    {
+      "files": 48,
+      "prefilter": "none",
+      "total_pairs": 1128,
+      "candidate_pairs": 1128,
+      "seconds": 56.596,
+      "pairs_per_s": 19.93,
+      "files_per_s": 0.85,
+      "prefilter_recall_on_links": 1.0,
+      "detected_links": 1.0,
+      "flagged_pairs": 134
+    },
+    {
+      "files": 48,
+      "prefilter": "minhash",
+      "total_pairs": 1128,
+      "candidate_pairs": 223,
+      "seconds": 24.417,
+      "pairs_per_s": 9.13,
+      "files_per_s": 1.97,
+      "prefilter_recall_on_links": 1.0,
+      "detected_links": 1.0,
+      "flagged_pairs": 70
+    },
+    {
+      "files": 96,
+      "prefilter": "minhash",
+      "total_pairs": 4560,
+      "candidate_pairs": 809,
+      "seconds": 46.715,
+      "pairs_per_s": 17.32,
+      "files_per_s": 2.06,
+      "prefilter_recall_on_links": 1.0,
+      "detected_links": 1.0,
+      "flagged_pairs": 172
+    },
+    {
+      "files": 192,
+      "prefilter": "minhash",
+      "total_pairs": 18336,
+      "candidate_pairs": 3183,
+      "seconds": 147.557,
+      "pairs_per_s": 21.57,
+      "files_per_s": 1.3,
+      "prefilter_recall_on_links": 1.0,
+      "detected_links": 1.0,
+      "flagged_pairs": 612
+    }
+  ],
+  "rss_mib_after_scan": 3436.7
+}
