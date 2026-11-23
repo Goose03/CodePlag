@@ -57,6 +57,7 @@ class NeuralConfig(BaseModel):
 
     model_name: str = "microsoft/unixcoder-base"
     device: str = "cpu"
+    openvino_device: Literal["CPU", "GPU"] | None = None
     max_length: int = 256
     projection_dim: int = 256
     head: Literal["mlp", "cosine"] = "mlp"
@@ -127,7 +128,7 @@ class ScanConfig(BaseModel):
     bands: int = 32
     top_k: int = 10
     min_candidates_for_prefilter: int = 20
-    workers: int = Field(default=0, description="Processes for AST comparisons (0 = cores - 1).")
+    workers: int = Field(default=4, ge=0, description="Processes for AST comparisons (0 = auto).")
     parallel_min_pairs: int = 64
 
 
@@ -149,6 +150,7 @@ def _apply_env(raw: dict[str, Any]) -> dict[str, Any]:
     env_map = {
         "CODEPLAG_DEVICE": ("neural", "device"),
         "CODEPLAG_MODEL_NAME": ("neural", "model_name"),
+        "CODEPLAG_OPENVINO_DEVICE": ("neural", "openvino_device"),
     }
     for var, (section, key) in env_map.items():
         value = os.environ.get(var)

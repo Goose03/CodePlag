@@ -28,6 +28,8 @@ All notable changes to this project are documented here. The format follows
 - CLI: `compare`, `scan`, `prepare-data`, `train`, `evaluate`, `plots`, `version`.
 - Scripts `scripts/prepare_data.sh`, `scripts/train.sh`, `scripts/evaluate.sh`.
 - Documentation: architecture overview, quickstart, Spanish report `docs/report/informe.md`.
+- Reference evaluation on the full held-out Python800 and Java250 pair sets, with
+  score tables, stress-test metrics, plots, and input hashes under `docs/results/`.
 - Tests: unit tests for every module (mocked encoder, no downloads) and an end-to-end
   integration test; fixtures in `tests/fixtures/`, samples in `data/samples/`.
 
@@ -36,3 +38,14 @@ All notable changes to this project are documented here. The format follows
 - `matplotlib` and `psutil` are runtime dependencies (used by `evaluate`).
 - The runtime Docker image creates the Hugging Face cache directory owned by the non-root
   user so the named volume is writable.
+- AST evaluation and scan default to four workers. Evaluation's `--workers` also controls
+  the scan benchmark. The benchmark records its worker count, device, and RSS snapshots.
+- Neural inference groups sources of similar lengths to reduce padding in each batch.
+- Optional `codeplag[openvino]` encoder inference in FP32 on CPU or Intel GPU.
+
+### Fixed
+
+- AST feature caches invalidate when sources change even if pair IDs are reused.
+- AST worker processes avoid importing the neural stack for structural comparisons.
+- Single-class robustness suites export undefined ROC-AUC and PR-AUC as JSON null.
+- The evaluation wrapper uses the selected configuration for both metrics and plots.

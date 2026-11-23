@@ -5,9 +5,12 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+import pytest
+
 from codeplag.core.config import Settings
 from codeplag.data.codenet import CodeFile
 from codeplag.data.pairs import PairBuilder, write_jsonl
+from codeplag.evaluation import efficiency
 from codeplag.evaluation.evaluate import run_evaluation
 from codeplag.evaluation.features import ast_features, neural_scores
 from codeplag.neural.infer import NeuralScorer
@@ -81,6 +84,8 @@ def test_full_pipeline(settings: Settings) -> None:
 
 def test_evaluation_ast_only_writes_results(settings: Settings) -> None:
     _prepare(settings)
+    suite = PairBuilder(_files(), "test", seed=2).collect("heavy_obfuscation", 4)
+    write_jsonl(suite, settings.paths.processed_dir / "hard_obfuscation.jsonl")
     summary = run_evaluation(settings, use_neural=False, workers=1, efficiency=False)
     results: Path = settings.paths.results_dir
     assert set(summary["test"]) == {"ast_only"}
@@ -91,3 +96,35 @@ def test_evaluation_ast_only_writes_results(settings: Settings) -> None:
     assert settings.paths.combiner_path.is_file()
     metrics = json.loads((results / "metrics.json").read_text())
     assert 0.0 <= metrics["combiners"]["ast_only"]["test_at_fpr_threshold"]["f1"] <= 1.0
+    robustness = json.loads((results / "robustness.json").read_text())
+    assert robustness["hard_obfuscation"]["ast_only"]["at_threshold"]["roc_auc"] is None
+    assert "roc_auc" not in summary["robustness"]["hard_obfuscation"]["ast_only"]
+
+
+def test_evaluation_uses_requested_workers_for_benchmark(
+    settings: Settings, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _prepare(settings)
+    monkeypatch.setattr(efficiency, "SCAN_SIZES", (4,))
+    summary = run_evaluation(settings, use_neural=False, workers=1)
+    benchmark = summary["efficiency"]
+    assert benchmark["scan_workers"] == 1
+    assert benchmark["scan_device"] is None
+    assert benchmark["scan"][0]["files"] == 4
+    assert benchmark["rss_mib_after_scan"] > 0
+    assert settings.scan.workers == 4
+
+
+def test_ast_cache_invalidates_when_source_changes(settings: Settings) -> None:
+    cache = settings.paths.cache_dir / "ast.jsonl"
+    record = {
+        "id": "test-000001",
+        "lang_a": "python",
+        "lang_b": "python",
+        "code_a": "x = 1\n",
+        "code_b": "x = 1\n",
+    }
+    original = ast_features([record], settings.ast, workers=1, cache_path=cache)
+    updated = {**record, "code_b": "print('hello')\n"}
+    changed = ast_features([updated], settings.ast, workers=1, cache_path=cache)
+    assert changed["test-000001"]["ted"] < original["test-000001"]["ted"]

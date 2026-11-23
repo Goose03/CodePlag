@@ -19,13 +19,9 @@ file B ─┘                                          │               │
 
 Normalizing identifiers and comments lets the AST analyzer catch renaming and formatting changes, while the neural model catches rewrites that keep the same logic.
 
-## Status
-
-Early development. The repository structure, tooling, and containers are in place; modules are being implemented in this order: `ast_analysis` → `neural` → `similarity` → CLI. Check the [CHANGELOG](CHANGELOG.md) for what is currently usable.
-
 ## Requirements
 
-- Linux or macOS
+- Linux, macOS, or Windows
 - Python **3.12**
 - Git
 - Docker with the Compose plugin (optional, for containerized runs)
@@ -47,6 +43,9 @@ pip install -e ".[dev]"
 pre-commit install
 cp .env.example .env
 ```
+
+On Windows PowerShell, activate the environment with `. .\.venv\Scripts\Activate.ps1` after
+creating it with `py -3.12 -m venv .venv`. Use `Copy-Item .env.example .env` for Docker Compose.
 
 <details>
 <summary>Arch Linux: getting Python 3.12</summary>
@@ -84,7 +83,9 @@ codeplag evaluate
 codeplag version
 ```
 
-Run `codeplag --help` for all options. The `compare`, `scan`, `train`, and `evaluate` commands are planned and land as their modules are completed; `version` works today.
+Run `codeplag --help` for all options. Without a local checkpoint, `compare` and `scan` use the
+AST detector. After training and evaluation, they load the trained checkpoint and the fitted
+combiner from `models/checkpoints/`.
 
 ## Running and testing
 
@@ -138,22 +139,30 @@ If Docker reports it cannot connect to `~/.docker/desktop/docker.sock`, run `doc
 **5. Prepare data and train**
 
 ```bash
-bash scripts/prepare_data.sh   # downloads and processes the dataset into data/processed/
-bash scripts/train.sh          # trains the neural model, saves checkpoints to models/checkpoints/
-bash scripts/evaluate.sh       # evaluates on the held-out test split, writes to docs/results/
+codeplag prepare-data
+codeplag train --device cuda
+codeplag evaluate --device cpu --workers 4
 ```
 
-Training is configured to be feasible on CPU. Set `CODEPLAG_DEVICE=cuda` in `.env` to use a GPU.
+For a shorter CPU experiment, use `codeplag train --device cpu --max-pairs 4000 --epochs 2`
+and `codeplag evaluate --device cpu --workers 2`. A shorter training run produces its own
+metrics and checkpoint. See the [quickstart](docs/usage/quickstart.md) for details.
+
+For optional OpenVINO acceleration, install `pip install -e ".[openvino]"` and set
+`CODEPLAG_OPENVINO_DEVICE=GPU` for a supported Intel GPU or `CPU` for CPU inference.
+Training still uses PyTorch.
 
 ## Configuration
 
-Defaults live in `configs/default.yaml`. Environment variables (from `.env`) override them.
+Defaults live in `configs/default.yaml`. Exported environment variables override them.
+Docker Compose reads `.env` and passes its variables to the container.
 
 | Variable               | Default                     | Description                      |
 | ---------------------- | --------------------------- | -------------------------------- |
 | `CODEPLAG_DEVICE`      | `cpu`                       | `cpu` or `cuda`                  |
 | `CODEPLAG_MODEL_NAME`  | `microsoft/unixcoder-base`  | Hugging Face model id            |
 | `CODEPLAG_LOG_LEVEL`   | `INFO`                      | Python logging level             |
+| `CODEPLAG_OPENVINO_DEVICE` | unset                   | Optional FP32 encoder on `CPU` or Intel `GPU` |
 
 ## Project structure
 
@@ -177,6 +186,16 @@ scripts/            data prep, train, and evaluate wrappers
 ## Dataset
 
 Training and evaluation use labeled code pairs: positives are solutions to the same problem or synthetically plagiarized variants (renaming, reordering, dead-code insertion); negatives are solutions to different problems. Splits are made by problem to avoid leakage. Dataset source, size, and license are documented in [docs/architecture/overview.md](docs/architecture/overview.md).
+
+## Evaluation
+
+On 4,000 held-out Python pairs, the combined detector achieved F1 **0.9536**, recall
+**95.65%**, and a **4.95%** false-positive rate at its validation-selected threshold.
+Its false-positive rate rose to **77.6%** on the shared-template stress test.
+
+See the [Spanish report](docs/report/informe.md) for the held-out comparison, robustness results,
+and benchmark measurements. The [evaluation artifacts](docs/results/) include JSON, CSV,
+and plots. Run `codeplag plots` to regenerate the figures.
 
 ## Limitations
 

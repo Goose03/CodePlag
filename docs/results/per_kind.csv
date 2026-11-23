@@ -1,0 +1,10 @@
+combiner,kind,n,fpr,mean_score,recall
+ast_only,different_problem,2000.0,0.0435,0.1762672015287809,
+ast_only,same_problem,1000.0,,0.6159581153728864,0.593
+ast_only,synthetic,1000.0,,0.9982295623912435,1.0
+neural_only,different_problem,2000.0,0.0485,0.07580850343141109,
+neural_only,same_problem,1000.0,,0.8538374403120603,0.902
+neural_only,synthetic,1000.0,,0.9678291536959419,0.997
+combined,different_problem,2000.0,0.0495,0.06706636053203453,
+combined,same_problem,1000.0,,0.8404675633053063,0.913
+combined,synthetic,1000.0,,0.9986558611373348,1.0
