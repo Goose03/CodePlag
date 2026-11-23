@@ -24,10 +24,13 @@ dependencies = [
   "pyyaml",
   "typer",
   "tqdm",
+  "matplotlib",       # evaluation plots
+  "psutil",           # memory measurements in efficiency benchmarks
 ]
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov", "ruff", "mypy", "pre-commit", "jupyterlab", "types-PyYAML"]
+openvino = ["openvino>=2026.4,<2027"]
 
 [project.scripts]
 codeplag = "codeplag.cli.main:app"
@@ -38,10 +41,12 @@ where = ["src"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q --cov=codeplag --cov-report=term-missing"
+pythonpath = ["."]
 
 [tool.ruff]
 line-length = 100
 src = ["src", "tests"]
+extend-exclude = ["tests/fixtures", "data"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
@@ -49,3 +54,7 @@ select = ["E", "F", "I", "B", "UP"]
 [tool.mypy]
 python_version = "3.12"
 ignore_missing_imports = true
+plugins = ["pydantic.mypy"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["codeplag", "tests"]
