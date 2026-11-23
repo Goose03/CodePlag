@@ -4,4 +4,3 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 codeplag evaluate "$@"
-codeplag plots

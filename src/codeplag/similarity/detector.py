@@ -13,7 +13,7 @@ from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass, field
 from itertools import combinations
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from codeplag.ast_analysis.normalizer import NormalizedSource
 from codeplag.ast_analysis.parser import EXTENSIONS, detect_language
@@ -25,7 +25,6 @@ from codeplag.ast_analysis.tree_distance import (
 )
 from codeplag.core.config import AstConfig, Settings
 from codeplag.core.logging import get_logger
-from codeplag.neural.infer import NeuralScorer
 from codeplag.similarity.combiner import (
     AST_FEATURES,
     Combiner,
@@ -39,6 +38,9 @@ from codeplag.similarity.prefilter import (
     shingles,
 )
 from codeplag.similarity.report import VERDICT_CLEAR, VERDICT_FLAGGED, ComparisonReport
+
+if TYPE_CHECKING:
+    from codeplag.neural.infer import NeuralScorer
 
 logger = get_logger(__name__)
 
@@ -124,6 +126,8 @@ class PlagiarismDetector:
             ckpt = self.settings.paths.checkpoints_dir / self.settings.neural.checkpoint_name
             if ckpt.is_file():
                 try:
+                    from codeplag.neural.infer import NeuralScorer
+
                     self._scorer = NeuralScorer.from_checkpoint(ckpt, self.settings)
                 except Exception as exc:  # noqa: BLE001 - degrade to AST-only, but tell the user
                     logger.warning("Could not load neural model (%s); using AST only", exc)

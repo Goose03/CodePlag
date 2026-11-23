@@ -150,7 +150,9 @@ def evaluate(
     no_neural: Annotated[
         bool, typer.Option("--no-neural", help="Evaluate AST features only.")
     ] = False,
-    workers: Annotated[int, typer.Option(help="Processes for AST feature extraction.")] = 0,
+    workers: Annotated[
+        int | None, typer.Option(min=0, help="AST processes for evaluation and scan benchmarks.")
+    ] = None,
     config: ConfigOption = None,
 ) -> None:
     """Fit the combiner on validation and evaluate everything on held-out data."""

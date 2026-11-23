@@ -169,3 +169,44 @@ def test_scorer_caches_embeddings(tmp_path: Path, mock_tokenizer: MockTokenizer)
 def test_from_checkpoint_missing_file(settings: Settings) -> None:
     with pytest.raises(FileNotFoundError):
         NeuralScorer.from_checkpoint(settings.paths.checkpoints_dir / "nope.pt", settings)
+
+
+def test_embedding_batches_preserve_requested_order(mock_tokenizer: MockTokenizer) -> None:
+    config = NeuralConfig(projection_dim=16, max_length=32, embed_batch_size=2)
+    scorer = NeuralScorer(make_mock_model(), mock_tokenizer, config)
+    codes = ("long_name = list(range(10))", "x = 1", "# a comment", "x = 1")
+    embeddings = scorer.embed(codes)
+    scorer.cache.clear()
+    individually = torch.cat([scorer.embed([code]) for code in codes])
+    assert torch.allclose(embeddings, individually, atol=1e-6)
+
+
+def test_checkpoint_can_use_optional_openvino(
+    settings: Settings, mock_tokenizer: MockTokenizer, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from transformers import AutoTokenizer
+
+    model = make_mock_model()
+    checkpoint = settings.paths.checkpoints_dir / "mock.pt"
+    checkpoint.parent.mkdir(parents=True, exist_ok=True)
+    torch.save(
+        {"state_dict": model.state_dict(), "neural_config": settings.neural.model_dump()},
+        checkpoint,
+    )
+    monkeypatch.setattr(AutoTokenizer, "from_pretrained", lambda _: mock_tokenizer)
+    monkeypatch.setattr("codeplag.neural.infer.build_model", lambda *args, **kwargs: model)
+    call_devices: list[str] = []
+
+    def fake_compile(
+        model: SiameseCodeModel, inputs: tuple[torch.Tensor, torch.Tensor], device: str
+    ) -> Any:
+        assert inputs[0].shape[0] == 2
+        call_devices.append(device)
+        return model.embed
+
+    monkeypatch.setattr("codeplag.neural.openvino.compile_encoder", fake_compile)
+    settings.neural.openvino_device = "GPU"
+    scorer = NeuralScorer.from_checkpoint(checkpoint, settings)
+    assert call_devices == ["GPU"]
+    assert scorer.device.type == "cpu"
+    assert scorer.embed(["x = 1"]).shape == (1, settings.neural.projection_dim)

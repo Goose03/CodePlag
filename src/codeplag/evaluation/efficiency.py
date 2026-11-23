@@ -1,9 +1,9 @@
 """Latency, memory and scan-throughput benchmarks on the current machine.
 
 * AST latency: parse + normalize + compare for single pairs.
-* Neural latency: one uncached pair (two encoder passes + head), on CPU and on CUDA when
-  available; batched throughput on the configured device.
-* Memory: peak resident set size of the process and peak CUDA memory.
+* Neural latency: one uncached pair (two encoder passes + head), with the selected
+  OpenVINO runtime or with PyTorch on CPU and optionally CUDA; batched throughput.
+* Memory: process RSS at benchmark boundaries and peak CUDA allocations.
 * Scan: ``scan`` over corpora of ``N`` files built from test pairs (each synthetic test pair
   contributes the original and its plagiarized copy), with and without the MinHash
   prefilter. Prefilter recall is measured on the known plagiarized links.
@@ -33,8 +33,8 @@ from codeplag.similarity.detector import PlagiarismDetector
 
 logger = get_logger(__name__)
 
-SCAN_SIZES: tuple[int, ...] = (25, 50, 100, 200, 400)
-EXHAUSTIVE_LIMIT = 200
+SCAN_SIZES: tuple[int, ...] = (24, 48, 96, 192)
+EXHAUSTIVE_LIMIT = 48
 
 
 def _stats_ms(samples: Sequence[float]) -> dict[str, float]:
@@ -59,6 +59,7 @@ def hardware_info() -> dict[str, Any]:
         "logical_cpus": os.cpu_count(),
         "ram_gb": round(psutil.virtual_memory().total / 2**30, 1),
         "torch": torch.__version__,
+        "torch_threads": torch.get_num_threads(),
         "cuda": torch.cuda.is_available(),
     }
     if torch.cuda.is_available():
@@ -94,7 +95,11 @@ def _scan_corpus(
 
 
 def run_efficiency(
-    settings: Settings, test_records: Sequence[Mapping[str, Any]], *, use_neural: bool = True
+    settings: Settings,
+    test_records: Sequence[Mapping[str, Any]],
+    *,
+    use_neural: bool = True,
+    scorer: NeuralScorer | None = None,
 ) -> dict[str, Any]:
     """Run all benchmarks and write ``efficiency.json``.
 
@@ -102,6 +107,7 @@ def run_efficiency(
         settings: Loaded settings.
         test_records: Test pairs used as benchmark inputs.
         use_neural: Include neural benchmarks (requires a checkpoint).
+        scorer: Reuse the evaluation scorer on its configured device if available.
 
     Returns:
         The benchmark results.
@@ -110,7 +116,13 @@ def run_efficiency(
 
     rng = random.Random(settings.seed)
     sample = rng.sample(list(test_records), k=min(200, len(test_records)))
-    out: dict[str, Any] = {"hardware": hardware_info()}
+    openvino_device = settings.neural.openvino_device
+    runtime = f"openvino-{openvino_device.lower()}" if openvino_device else settings.neural.device
+    out: dict[str, Any] = {
+        "hardware": hardware_info(),
+        "scan_workers": settings.scan.workers,
+        "scan_device": runtime if use_neural else None,
+    }
 
     rss_before = _rss_mb()
     ast_times = []
@@ -126,18 +138,24 @@ def run_efficiency(
     if use_neural and ckpt.is_file():
         pairs = [(str(r["code_a"]), str(r["code_b"])) for r in sample[:101]]
         out["neural_latency"] = {}
-        devices = ["cpu"] + (["cuda"] if torch.cuda.is_available() else [])
+        devices = [runtime] if openvino_device else ["cpu"]
+        if not openvino_device and settings.neural.device == "cuda" and torch.cuda.is_available():
+            devices.append("cuda")
         for device in devices:
             dev_settings = settings.model_copy(deep=True)
-            dev_settings.neural.device = device
-            scorer = NeuralScorer.from_checkpoint(ckpt, dev_settings)
+            if not openvino_device:
+                dev_settings.neural.device = device
+            if scorer is not None and (openvino_device or scorer.device.type == device):
+                benchmark_scorer = scorer
+            else:
+                benchmark_scorer = NeuralScorer.from_checkpoint(ckpt, dev_settings)
             if device == "cuda":
                 torch.cuda.reset_peak_memory_stats()
-            out["neural_latency"][device] = _neural_latency(scorer, pairs)
-            scorer.cache.clear()
+            out["neural_latency"][device] = _neural_latency(benchmark_scorer, pairs)
+            benchmark_scorer.cache.clear()
             all_pairs = [(str(r["code_a"]), str(r["code_b"])) for r in test_records[:1000]]
             start = time.perf_counter()
-            scorer.score_pairs(all_pairs)
+            benchmark_scorer.score_pairs(all_pairs)
             if device == "cuda":
                 torch.cuda.synchronize()
                 out["neural_latency"][device]["peak_cuda_mb"] = round(
@@ -147,11 +165,14 @@ def run_efficiency(
             out["neural_latency"][device]["batched_pairs_per_s"] = round(
                 len(all_pairs) / elapsed, 2
             )
-            del scorer
-    out["peak_rss_mb"] = round(max(_rss_mb(), rss_before), 1)
+            del benchmark_scorer
+    out["rss_mib_before_benchmarks"] = round(rss_before, 1)
+    out["rss_mib_before_scan"] = round(_rss_mb(), 1)
 
     scans = []
-    detector = PlagiarismDetector(settings.model_copy(deep=True), use_neural=use_neural)
+    detector = PlagiarismDetector(
+        settings.model_copy(deep=True), scorer=scorer, use_neural=use_neural
+    )
     for n in SCAN_SIZES:
         tmp = Path(tempfile.mkdtemp(prefix=f"codeplag_scan_{n}_"))
         try:
@@ -187,7 +208,9 @@ def run_efficiency(
         finally:
             shutil.rmtree(tmp, ignore_errors=True)
     out["scan"] = scans
-    out["peak_rss_mb_after_scan"] = round(_rss_mb(), 1)
+    out["rss_mib_after_scan"] = round(_rss_mb(), 1)
     settings.paths.results_dir.mkdir(parents=True, exist_ok=True)
-    (settings.paths.results_dir / "efficiency.json").write_text(json.dumps(out, indent=2))
+    (settings.paths.results_dir / "efficiency.json").write_text(
+        json.dumps(out, indent=2) + "\n", encoding="utf-8"
+    )
     return out

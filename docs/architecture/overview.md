@@ -44,7 +44,7 @@ then compares only the candidate pairs, in parallel worker processes.
 | `neural/model.py` | Siamese network: shared encoder, mean pooling, projection, symmetric MLP or cosine head. |
 | `neural/dataset.py` | `PairDataset` and a batch tokenizing collator. |
 | `neural/train.py` | BCE training with AdamW, warmup, AMP on CUDA, early stopping on validation ROC-AUC. |
-| `neural/infer.py` | Checkpoint loading and embedding cache (memory and optional disk). |
+| `neural/infer.py` | Checkpoint loading, PyTorch or optional OpenVINO encoder, and embedding cache. |
 | `similarity/combiner.py` | Logistic or weighted fusion; FPR-constrained threshold; JSON persistence. |
 | `similarity/report.py` | Text and JSON reports. |
 | `similarity/prefilter.py` | MinHash signatures, LSH banding, embedding neighbors. |
@@ -65,10 +65,9 @@ then compares only the candidate pairs, in parallel worker processes.
   `tree_edit_distance` reuses `zss.AnnotatedTree` and the same recurrence without that
   bookkeeping; a unit test checks it returns exactly the same distance as
   `zss.simple_distance`.
-* **Size guard.** Trees above `ast.max_nodes` (default 250 normalized nodes, above the 90th
-  percentile of the test files) are depth-pruned before tree edit distance and the result is
-  flagged approximate. On 100 test pairs this changed the TED similarity by 0.005 on average
-  (0.097 at most) while cutting the mean time per pair by about a quarter.
+* **Size guard.** Trees above `ast.max_nodes` (default 250 normalized nodes) are depth-pruned
+  before tree edit distance and the result is flagged approximate. Subtree and n-gram overlap
+  still use the full normalized trees.
 * **Neural model.** UniXcoder (`microsoft/unixcoder-base`, RoBERTa architecture, 125M
   parameters) is pretrained on code in several languages. The embeddings and lower 6 of 12
   layers are frozen so training fits a laptop GPU (or a CPU with fewer pairs); the head is
@@ -76,7 +75,10 @@ then compares only the candidate pairs, in parallel worker processes.
 * **Calibrated fusion with a conservative threshold.** A false accusation is costlier than a
   missed case, so the decision threshold is the smallest one whose false-positive rate on
   the validation split is at most `combiner.max_fpr` (5%).
-* **No pickles.** Combiners are stored as JSON; checkpoints are PyTorch state dicts.
+* **Model artifacts.** Combiners are stored as JSON, and checkpoints store PyTorch state dicts
+  and training metadata. Load checkpoints from a trusted source.
+* **Evaluation cache.** Cached AST features are tied to the AST settings and the contents and
+  languages of the input pairs. Windows AST workers can run without loading the neural stack.
 
 ## Dataset
 
@@ -89,7 +91,7 @@ See `docs/report/informe.md` (Spanish) for the full justification. Summary:
   [`qiankunmu/Project_CodeNet_Python800_and_Java250`](https://huggingface.co/datasets/qiankunmu/Project_CodeNet_Python800_and_Java250).
   The CodeNet repository is released under Apache-2.0; the mirror declares Apache-2.0.
 * **Unseen language:** CodeNet **Java250** (250 problems × 300 Java solutions = 75,000 files).
-* **Fields per pair** (`data/processed/*.jsonl`): `id`, `split`, `label` (1 = plagiarism),
+* **Fields per pair** (`data/processed/*.jsonl`): `id`, `split`, `label` (1 = positive proxy),
   `kind` (`same_problem`, `synthetic`, `different_problem`, `hard_*`), `lang_a`, `lang_b`,
   `file_a`, `file_b` (`<problem>/<submission>`), `code_a`, `code_b`, `transforms`.
 * **Cleaning** (Python800): 240,000 files → 223,803 kept (11,677 with fewer than 3 non-blank

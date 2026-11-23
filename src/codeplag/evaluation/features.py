@@ -2,20 +2,24 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
+import tempfile
 import time
 from collections.abc import Mapping, Sequence
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from tqdm import tqdm
 
 from codeplag.ast_analysis.tree_distance import compare_sources
 from codeplag.core.config import AstConfig
 from codeplag.core.logging import get_logger
-from codeplag.neural.infer import NeuralScorer
+
+if TYPE_CHECKING:
+    from codeplag.neural.infer import NeuralScorer
 
 logger = get_logger(__name__)
 
@@ -45,7 +49,7 @@ def ast_features(
 
     Args:
         records: Pair records (``id``, ``code_a``, ``code_b``, ``lang_a``, ``lang_b``).
-        config: AST settings (part of the cache key).
+        config: AST settings (part of the cache key, along with the pair inputs).
         workers: Worker processes (0 = ``os.cpu_count() - 1``; 1 = in-process).
         cache_path: JSONL cache file.
 
@@ -54,12 +58,15 @@ def ast_features(
         ``approximate``, ``seconds``).
     """
     cfg = config.model_dump()
-    signature = json.dumps(cfg, sort_keys=True)
+    inputs = hashlib.sha256()
+    fields = ("id", "code_a", "lang_a", "code_b", "lang_b")
+    for record in records:
+        inputs.update(json.dumps([str(record[field]) for field in fields]).encode("utf-8"))
+    header = {"config": cfg, "inputs": inputs.hexdigest()}
     cached: dict[str, dict[str, float]] = {}
     if cache_path is not None and cache_path.is_file():
         with cache_path.open(encoding="utf-8") as fh:
-            header = json.loads(fh.readline())
-            if header.get("config") == signature:
+            if json.loads(fh.readline() or "{}") == header:
                 for line in fh:
                     item = json.loads(line)
                     cached[item["id"]] = item["features"]
@@ -89,10 +96,18 @@ def ast_features(
             cached[pair_id] = features
         if cache_path is not None:
             cache_path.parent.mkdir(parents=True, exist_ok=True)
-            with cache_path.open("w", encoding="utf-8") as fh:
-                fh.write(json.dumps({"config": signature}) + "\n")
-                for pair_id, features in cached.items():
-                    fh.write(json.dumps({"id": pair_id, "features": features}) + "\n")
+            temporary = tempfile.NamedTemporaryFile(
+                mode="w", encoding="utf-8", dir=cache_path.parent, delete=False
+            )
+            temporary_path = Path(temporary.name)
+            try:
+                with temporary:
+                    temporary.write(json.dumps(header) + "\n")
+                    for pair_id, features in cached.items():
+                        temporary.write(json.dumps({"id": pair_id, "features": features}) + "\n")
+                temporary_path.replace(cache_path)
+            finally:
+                temporary_path.unlink(missing_ok=True)
     return {str(r["id"]): cached[str(r["id"])] for r in records}
 
 

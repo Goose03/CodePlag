@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import csv
 import json
+import math
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import Any
@@ -113,7 +114,7 @@ def run_evaluation(
     settings: Settings,
     *,
     use_neural: bool = True,
-    workers: int = 0,
+    workers: int | None = None,
     efficiency: bool = True,
 ) -> dict[str, Any]:
     """Run the full evaluation and write result files.
@@ -121,12 +122,15 @@ def run_evaluation(
     Args:
         settings: Loaded settings.
         use_neural: Include the neural model (requires a checkpoint).
-        workers: Processes for AST feature extraction (0 = all cores but one).
+        workers: Override the configured AST workers for features and scan benchmarks.
         efficiency: Also run latency/throughput benchmarks.
 
     Returns:
         A compact summary (also written to ``summary.json``).
     """
+    if workers is not None:
+        settings = settings.model_copy(deep=True)
+        settings.scan.workers = workers
     paths = settings.paths
     results = paths.results_dir
     results.mkdir(parents=True, exist_ok=True)
@@ -145,7 +149,7 @@ def run_evaluation(
         ast_raw[name] = ast_features(
             records,
             settings.ast,
-            workers=workers,
+            workers=settings.scan.workers,
             cache_path=paths.cache_dir / f"ast_{name}.jsonl",
         )
         nn = neural_scores(records, scorer) if scorer is not None else None
@@ -181,7 +185,7 @@ def run_evaluation(
         }
         metrics["val_fit"][cname] = comb.fit_metrics
     metrics["max_fpr"] = settings.combiner.max_fpr
-    (results / "metrics.json").write_text(json.dumps(metrics, indent=2))
+    (results / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
 
     # ---- threshold sweep on test
     sweep = []
@@ -241,7 +245,13 @@ def run_evaluation(
         robustness[name] = {}
         for cname, comb in combiners.items():
             s, y = scores[name][cname], labels[name]
-            entry: dict[str, Any] = {"at_threshold": binary_metrics(y, s, comb.threshold)}
+            at_threshold = binary_metrics(y, s, comb.threshold)
+            entry: dict[str, Any] = {
+                "at_threshold": {
+                    key: value if math.isfinite(value) else None
+                    for key, value in at_threshold.items()
+                },
+            }
             if name == "unseen_java":
                 entry["at_threshold_by_kind"] = {
                     kind: _subset_metrics(
@@ -256,7 +266,9 @@ def run_evaluation(
                 s_mix = np.concatenate([s, scores["test"][cname][other]])
                 entry["vs_test_opposite_class"] = binary_metrics(y_mix, s_mix, comb.threshold)
             robustness[name][cname] = entry
-    (results / "robustness.json").write_text(json.dumps(robustness, indent=2))
+    (results / "robustness.json").write_text(
+        json.dumps(robustness, indent=2, allow_nan=False) + "\n", encoding="utf-8"
+    )
 
     # ---- curves and per-pair scores
     curves = {
@@ -264,7 +276,7 @@ def run_evaluation(
         for name in ("test", "unseen_java")
         if name in sets and len(np.unique(labels[name])) == 2
     }
-    (results / "curves.json").write_text(json.dumps(curves))
+    (results / "curves.json").write_text(json.dumps(curves) + "\n", encoding="utf-8")
     for name, records in sets.items():
         out_rows = []
         for i, r in enumerate(records):
@@ -286,9 +298,9 @@ def run_evaluation(
         from codeplag.evaluation.efficiency import run_efficiency
 
         summary["efficiency"] = run_efficiency(
-            settings, sets["test"], use_neural=scorer is not None
+            settings, sets["test"], use_neural=scorer is not None, scorer=scorer
         )
-    (results / "summary.json").write_text(json.dumps(summary, indent=2))
+    (results / "summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
 
     from codeplag.evaluation.plots import make_all_plots
 
@@ -310,7 +322,7 @@ def _summary(
             c: {
                 k: round(v, 4)
                 for k, v in e["at_threshold"].items()
-                if k in ("recall", "fpr", "roc_auc", "f1")
+                if v is not None and k in ("recall", "fpr", "roc_auc", "f1")
             }
             for c, e in by_comb.items()
         }

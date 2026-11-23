@@ -30,6 +30,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = ["pytest", "pytest-cov", "ruff", "mypy", "pre-commit", "jupyterlab", "types-PyYAML"]
+openvino = ["openvino>=2026.4,<2027"]
 
 [project.scripts]
 codeplag = "codeplag.cli.main:app"

@@ -8,7 +8,7 @@ encoder passes plus cheap head evaluations for the candidate pairs.
 from __future__ import annotations
 
 import hashlib
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from pathlib import Path
 from typing import Any
 
@@ -54,6 +54,7 @@ class NeuralScorer:
         self.collator = PairCollator(tokenizer, config.max_length)
         self.cache: dict[str, Tensor] = {}
         self.cache_dir = cache_dir
+        self._embed_batch: Callable[[Tensor, Tensor], Tensor] | None = None
         if cache_dir is not None:
             cache_dir.mkdir(parents=True, exist_ok=True)
 
@@ -84,13 +85,24 @@ class NeuralScorer:
             raise FileNotFoundError(f"Checkpoint not found: {ckpt_path}")
         payload: dict[str, Any] = torch.load(ckpt_path, map_location="cpu", weights_only=False)
         config = NeuralConfig.model_validate(
-            {**payload.get("neural_config", {}), "device": settings.neural.device}
+            {
+                **payload.get("neural_config", {}),
+                "device": settings.neural.device,
+                "openvino_device": settings.neural.openvino_device,
+            }
         )
         model = build_model(config.model_copy(update={"freeze_layers": 0}), pretrained=False)
         model.load_state_dict(payload["state_dict"])
         tokenizer = AutoTokenizer.from_pretrained(config.model_name)
         cache_dir = settings.paths.cache_dir / "embeddings" if use_disk_cache else None
-        return cls(model, tokenizer, config, resolve_device(config.device), cache_dir)
+        device = torch.device("cpu") if config.openvino_device else resolve_device(config.device)
+        scorer = cls(model, tokenizer, config, device, cache_dir)
+        if config.openvino_device is not None:
+            from codeplag.neural.openvino import compile_encoder
+
+            example = scorer.collator.encode(["x = 1", "def f(x):\n    return x * 2"])
+            scorer._embed_batch = compile_encoder(model, example, config.openvino_device)
+        return scorer
 
     def _disk_path(self, key: str) -> Path | None:
         return self.cache_dir / f"{key}.npy" if self.cache_dir is not None else None
@@ -115,12 +127,14 @@ class NeuralScorer:
                 self.cache[key] = torch.from_numpy(np.load(disk))
             else:
                 missing[key] = code
-        items = list(missing.items())
+        # Similar-sized sources keep dynamic padding in each batch small.
+        items = sorted(missing.items(), key=lambda item: len(item[1]))
         bs = self.config.embed_batch_size
+        encode_batch = self._embed_batch or self.model.embed
         for start in range(0, len(items), bs):
             chunk = items[start : start + bs]
             ids, mask = self.collator.encode([code for _, code in chunk])
-            emb = self.model.embed(ids.to(self.device), mask.to(self.device)).float().cpu()
+            emb = encode_batch(ids.to(self.device), mask.to(self.device)).float().cpu()
             for (key, _), vector in zip(chunk, emb, strict=True):
                 self.cache[key] = vector
                 disk = self._disk_path(key)

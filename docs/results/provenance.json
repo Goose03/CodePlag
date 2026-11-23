@@ -1,0 +1,42 @@
+{
+  "python": "3.12.12",
+  "packages": {
+    "torch": "2.14.1+cu126",
+    "transformers": "5.19.0",
+    "tree-sitter": "0.26.0",
+    "tree-sitter-python": "0.25.0",
+    "tree-sitter-java": "0.23.5",
+    "tree-sitter-javascript": "0.25.0",
+    "zss": "1.2.0",
+    "numpy": "2.5.4",
+    "scikit-learn": "1.9.1",
+    "matplotlib": "3.11.2",
+    "openvino": "2026.4.1"
+  },
+  "sha256": {
+    "data/raw/Project_CodeNet_Python800.tar.gz": "39297d11df8030ce0b6619e678547a738d74c4715c5c9a5be0af83941a5587b0",
+    "data/raw/Project_CodeNet_Java250.tar.gz": "48004d058cf52300f77d7a26fa1b6a2ff14bec3f05ed68835a13147990e61316",
+    "models/checkpoints/best.pt": "663ef307e83479315193415fea17096dbaeee5510876dea15373d6bf7faf70da",
+    "configs/default.yaml": "6ab857ec33697ea5ff169bfc4c9e1be0601010130df59d88e242597bd52c04c5",
+    "data/processed/train.jsonl": "d837ba44cdf748497c868934603e1dd8d08723363b873db372c7c239cd1bdd00",
+    "data/processed/val.jsonl": "b953d6d0ab7185ceaef49ea977498217535599690890efbded05cb247df6dc4d",
+    "data/processed/test.jsonl": "01628a1fd0430fba5f2f1d99bb9ad89839539a50bdcab957dadf72693713d72b",
+    "data/processed/hard_obfuscation.jsonl": "ee70212fba492ffc1dbf4f6def578828289e7c761434188522a22dfdad106273",
+    "data/processed/hard_equivalent.jsonl": "ce230725120aaf91187b9428144208c88fcdec6d4033965c0d3fcd492b421d04",
+    "data/processed/hard_boilerplate.jsonl": "e334994906565240cef02c7f90b659754e1d253ae597204a3e41e6c2ca3467ac",
+    "data/processed/unseen_java.jsonl": "3ba040fdd16799c7452689d41a86050ba1d079e71a2191739143bc744ffdaad3",
+    "data/processed/splits.json": "57781f58dfd925aa8dcdead1e9028fb75e2144639e793283515ed48a1a898069"
+  },
+  "benchmark": {
+    "command": "codeplag evaluate --device cpu --workers 4",
+    "environment": {
+      "CODEPLAG_OPENVINO_DEVICE": "GPU",
+      "OMP_NUM_THREADS": "2",
+      "MKL_NUM_THREADS": "2"
+    },
+    "encoder": {
+      "device": "Intel(R) UHD Graphics (iGPU)",
+      "precision": "FP32"
+    }
+  }
+}
