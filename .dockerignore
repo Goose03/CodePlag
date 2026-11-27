@@ -12,3 +12,7 @@ notebooks
 docs
 tests
 .env
+web/node_modules
+web/.next
+web/tests
+data/jobs

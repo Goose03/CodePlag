@@ -1,0 +1,115 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: Python (core + web API)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          uv venv
+          uv pip install torch --index-url https://download.pytorch.org/whl/cpu
+          uv pip install -e ".[dev,web,web-dev]"
+      - name: Lint and type-check
+        run: |
+          uv run ruff check src tests web/api web/tests scripts
+          uv run mypy src web/api
+      - name: Tests (core)
+        run: uv run pytest tests
+      - name: Tests (web API, incl. Python/TypeScript parity)
+        run: uv run pytest web/tests -o addopts="" -q
+
+  web:
+    name: Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test -- --run
+      - run: npm run build
+
+  docker:
+    name: Docker images + smoke test
+    needs: [python, web]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start the stack (AST-only, no checkpoint in CI)
+        run: |
+          cp .env.example .env
+          docker compose up -d --build --wait redis api worker web
+      - name: Upload samples and wait for the job
+        run: |
+          set -euo pipefail
+          job=$(curl -sf -F files=@data/samples/a.py -F files=@data/samples/b.py \
+                     -F files=@data/samples/c.py http://localhost:8000/api/jobs | jq -r .jobId)
+          for i in $(seq 1 60); do
+            status=$(curl -sf http://localhost:8000/api/jobs/$job | jq -r .status)
+            echo "status=$status"; [ "$status" = completed ] && break; sleep 2
+          done
+          [ "$status" = completed ]
+          curl -sf http://localhost:8000/api/jobs/$job/report | jq '.flagged, .done, .total'
+          curl -sf -o report.pdf http://localhost:8000/api/jobs/$job/report.pdf
+          head -c 4 report.pdf | grep -q '%PDF'
+          curl -sf http://localhost:3000 > /dev/null
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+
+  publish:
+    name: Publish images
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [docker]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: names
+        run: echo "repo=${GITHUB_REPOSITORY,,}" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.api
+          push: true
+          tags: |
+            ghcr.io/${{ steps.names.outputs.repo }}/api:${{ github.sha }}
+            ghcr.io/${{ steps.names.outputs.repo }}/api:latest
+      - uses: docker/build-push-action@v6
+        with:
+          context: web
+          push: true
+          build-args: NEXT_PUBLIC_API_URL=${{ vars.PUBLIC_API_URL || 'http://localhost:8000' }}
+          tags: |
+            ghcr.io/${{ steps.names.outputs.repo }}/web:${{ github.sha }}
+            ghcr.io/${{ steps.names.outputs.repo }}/web:latest
