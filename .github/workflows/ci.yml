@@ -21,7 +21,6 @@ jobs:
           python-version: "3.12"
       - name: Install
         run: |
-          uv venv
           uv pip install torch --index-url https://download.pytorch.org/whl/cpu
           uv pip install -e ".[dev,web,web-dev]"
       - name: Lint and type-check
