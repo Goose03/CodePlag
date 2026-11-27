@@ -1,0 +1,28 @@
+# dependencies
+node_modules/
+
+# next.js
+.next/
+out/
+next-env.d.ts.bak
+*.tsbuildinfo
+
+# generated at dev/build time by scripts/copy-pdf-worker.mjs
+public/pdf.worker.min.mjs
+
+# testing / misc
+coverage/
+.vitest/
+.DS_Store
+*.log
+npm-debug.log*
+
+# env
+.env
+.env*.local
+
+# python api
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
