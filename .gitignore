@@ -17,3 +17,6 @@ data/raw/*
 data/processed/*
 models/checkpoints/*
 !**/.gitkeep
+data/jobs/
+web/node_modules/
+web/.next/
