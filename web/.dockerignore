@@ -1,0 +1,11 @@
+node_modules
+.next
+coverage
+api
+tests
+.env
+.env*.local
+*.log
+Dockerfile
+.dockerignore
+public/pdf.worker.min.mjs

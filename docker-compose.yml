@@ -1,3 +1,26 @@
+# CLI:  docker compose run --rm codeplag compare data/samples/a.py data/samples/b.py
+# Web:  docker compose up --build   ->  http://localhost:3000 (API docs: http://localhost:8000/docs)
+# GPU worker: docker compose --profile gpu up --build
+
+x-web-backend: &web-backend
+  build:
+    context: .
+    dockerfile: docker/Dockerfile.api
+    args:
+      TORCH_INDEX: ${TORCH_INDEX:-https://download.pytorch.org/whl/cpu}
+  image: codeplag-api:latest
+  env_file: .env
+  environment:
+    CODEPLAG_WEB_REDIS_URL: redis://redis:6379/0
+    CODEPLAG_WEB_JOBS_DIR: /data/jobs
+  volumes:
+    - jobs:/data/jobs
+    - ${CODEPLAG_CHECKPOINTS:-./models/checkpoints}:/app/models/checkpoints:ro
+    - hf_cache:/app/.cache/huggingface
+  depends_on:
+    redis:
+      condition: service_healthy
+
 services:
   codeplag:
     build:
@@ -9,6 +32,7 @@ services:
       - ./data:/app/data
       - ./models:/app/models
       - hf_cache:/app/.cache/huggingface
+    profiles: ["cli"]
 
   dev:
     build:
@@ -22,5 +46,68 @@ services:
     tty: true
     stdin_open: true
 
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "512mb",
+              "--maxmemory-policy", "volatile-lru"]
+    volumes:
+      - redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      retries: 10
+
+  api:
+    <<: *web-backend
+    command: ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/healthz')"]
+      interval: 10s
+      retries: 10
+
+  worker:
+    <<: *web-backend
+    command: ["arq", "api.worker.WorkerSettings"]
+    deploy:
+      replicas: ${WORKER_REPLICAS:-1}
+
+  worker-gpu:
+    <<: *web-backend
+    profiles: ["gpu"]
+    command: ["arq", "api.worker.WorkerSettings"]
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+      args:
+        TORCH_INDEX: https://download.pytorch.org/whl/cu126
+    image: codeplag-api:gpu
+    environment:
+      CODEPLAG_WEB_REDIS_URL: redis://redis:6379/0
+      CODEPLAG_WEB_JOBS_DIR: /data/jobs
+      CODEPLAG_DEVICE: cuda
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  web:
+    build:
+      context: ./web
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    image: codeplag-web:latest
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
 volumes:
   hf_cache:
+  jobs:
+  redis:

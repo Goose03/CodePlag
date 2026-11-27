@@ -1,0 +1,644 @@
+[
+ {
+  "type": "job.started",
+  "files": [
+   {
+    "fileId": "9a24bd38e65e683d48c354c50b0378f80798bdc3f4febe5090b1b4b9edb80532",
+    "name": "a.py",
+    "language": "python",
+    "sha256": "9a24bd38e65e683d48c354c50b0378f80798bdc3f4febe5090b1b4b9edb80532"
+   },
+   {
+    "fileId": "ed19be70b457b160bb6be8c708a1af6fcda9ff5c2830da4ad9784def0fe6e68c",
+    "name": "b.py",
+    "language": "python",
+    "sha256": "ed19be70b457b160bb6be8c708a1af6fcda9ff5c2830da4ad9784def0fe6e68c"
+   },
+   {
+    "fileId": "d4477256e8893eb720286dafc8099f96ed061e895e31dc403473964f3344b25a",
+    "name": "c.py",
+    "language": "python",
+    "sha256": "d4477256e8893eb720286dafc8099f96ed061e895e31dc403473964f3344b25a"
+   },
+   {
+    "fileId": "b263a48f81c15a2005fb3284692d8d9277086109a66a3d806263606659a23847",
+    "name": "Original.java",
+    "language": "java",
+    "sha256": "b263a48f81c15a2005fb3284692d8d9277086109a66a3d806263606659a23847"
+   },
+   {
+    "fileId": "a7fad7fae6c198222a82efc8771eaa14aea883b04c401ab16dcb3130441fa20f",
+    "name": "Renamed.java",
+    "language": "java",
+    "sha256": "a7fad7fae6c198222a82efc8771eaa14aea883b04c401ab16dcb3130441fa20f"
+   }
+  ],
+  "totalPairs": 10,
+  "candidatePairs": 10,
+  "prefilter": "none",
+  "combiner": {
+   "name": "combined",
+   "method": "logistic",
+   "features": [
+    "ted",
+    "subtree",
+    "ngram",
+    "neural"
+   ],
+   "coef": [
+    0.22808147339354212,
+    3.5959503062526337,
+    3.3568728160656476,
+    5.153040797658865
+   ],
+   "intercept": -4.5186396837932294,
+   "threshold": 0.17657059265507694,
+   "version": "868d1803637d"
+  },
+  "modelVersion": "best.pt",
+  "seq": 1,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "log",
+  "level": "info",
+  "message": "5 files, 10 candidate pairs of 10 (prefilter: none).",
+  "ts": "2026-01-01T00:00:00+00:00",
+  "seq": 2,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "log",
+  "level": "info",
+  "message": "Combiner 'combined' (threshold 0.1766); neural model loaded.",
+  "ts": "2026-01-01T00:00:00+00:00",
+  "seq": 3,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.partial",
+  "stage": "ast",
+  "pairKey": "5e69300edefb091a",
+  "fileA": "a.py",
+  "fileB": "b.py",
+  "astFeatures": {
+   "ted": 1.0,
+   "subtree": 1.0,
+   "ngram": 1.0
+  },
+  "astScore": 1.0,
+  "seq": 4,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.partial",
+  "stage": "ast",
+  "pairKey": "933c07b49f9da56e",
+  "fileA": "a.py",
+  "fileB": "c.py",
+  "astFeatures": {
+   "ted": 0.17123287671232879,
+   "subtree": 0.0,
+   "ngram": 0.304
+  },
+  "astScore": 0.1596931506849315,
+  "seq": 5,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.partial",
+  "stage": "ast",
+  "pairKey": "f5e469871d27253b",
+  "fileA": "a.py",
+  "fileB": "Original.java",
+  "astFeatures": {
+   "ted": 0.01851851851851849,
+   "subtree": 0.05,
+   "ngram": 0.11538461538461539
+  },
+  "astScore": 0.057022792022792014,
+  "seq": 6,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.partial",
+  "stage": "ast",
+  "pairKey": "910f9df0d8441c8e",
+  "fileA": "a.py",
+  "fileB": "Renamed.java",
+  "astFeatures": {
+   "ted": 0.0,
+   "subtree": 0.07407407407407407,
+   "ngram": 0.1339712918660287
+  },
+  "astScore": 0.06241360978203083,
+  "seq": 7,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.scored",
+  "stage": "final",
+  "pairKey": "5e69300edefb091a",
+  "combinerVersion": "868d1803637d",
+  "fileA": "a.py",
+  "fileB": "b.py",
+  "languageA": "python",
+  "languageB": "python",
+  "score": 0.9995966513121161,
+  "threshold": 0.17657059265507694,
+  "verdict": "likely_plagiarism",
+  "detector": "combined",
+  "astScore": 1.0,
+  "astFeatures": {
+   "ted": 1.0,
+   "subtree": 1.0,
+   "ngram": 1.0
+  },
+  "neuralScore": 1.0,
+  "matches": [
+   {
+    "linesA": [
+     1,
+     26
+    ],
+    "linesB": [
+     1,
+     23
+    ],
+    "size": 108,
+    "node": "module"
+   }
+  ],
+  "warnings": [],
+  "seq": 8,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.scored",
+  "stage": "final",
+  "pairKey": "933c07b49f9da56e",
+  "combinerVersion": "868d1803637d",
+  "fileA": "a.py",
+  "fileB": "c.py",
+  "languageA": "python",
+  "languageB": "python",
+  "score": 0.030513738003449996,
+  "threshold": 0.17657059265507694,
+  "verdict": "unlikely_plagiarism",
+  "detector": "combined",
+  "astScore": 0.1596931506849315,
+  "astFeatures": {
+   "ted": 0.17123287671232879,
+   "subtree": 0.0,
+   "ngram": 0.304
+  },
+  "neuralScore": 9.819542901823297e-05,
+  "matches": [],
+  "warnings": [],
+  "seq": 9,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.scored",
+  "stage": "final",
+  "pairKey": "f5e469871d27253b",
+  "combinerVersion": "868d1803637d",
+  "fileA": "a.py",
+  "fileB": "Original.java",
+  "languageA": "python",
+  "languageB": "java",
+  "score": 0.0190698162231522,
+  "threshold": 0.17657059265507694,
+  "verdict": "unlikely_plagiarism",
+  "detector": "combined",
+  "astScore": 0.057022792022792014,
+  "astFeatures": {
+   "ted": 0.01851851851851849,
+   "subtree": 0.05,
+   "ngram": 0.11538461538461539
+  },
+  "neuralScore": 0.0013375505805015564,
+  "matches": [
+   {
+    "linesA": [
+     11,
+     11
+    ],
+    "linesB": [
+     7,
+     7
+    ],
+    "size": 7,
+    "node": "ASSIGN"
+   }
+  ],
+  "warnings": [
+   "Comparing different languages (python vs java)."
+  ],
+  "seq": 10,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.scored",
+  "stage": "final",
+  "pairKey": "910f9df0d8441c8e",
+  "combinerVersion": "868d1803637d",
+  "fileA": "a.py",
+  "fileB": "Renamed.java",
+  "languageA": "python",
+  "languageB": "java",
+  "score": 0.0219677682163651,
+  "threshold": 0.17657059265507694,
+  "verdict": "unlikely_plagiarism",
+  "detector": "combined",
+  "astScore": 0.06241360978203083,
+  "astFeatures": {
+   "ted": 0.0,
+   "subtree": 0.07407407407407407,
+   "ngram": 0.1339712918660287
+  },
+  "neuralScore": 0.0012773192720487714,
+  "matches": [
+   {
+    "linesA": [
+     11,
+     11
+    ],
+    "linesB": [
+     9,
+     9
+    ],
+    "size": 8,
+    "node": "expression_statement"
+   }
+  ],
+  "warnings": [
+   "Comparing different languages (python vs java)."
+  ],
+  "seq": 11,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "progress",
+  "done": 4,
+  "total": 10,
+  "seq": 12,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.partial",
+  "stage": "ast",
+  "pairKey": "593d24b50aa1f5e8",
+  "fileA": "b.py",
+  "fileB": "c.py",
+  "astFeatures": {
+   "ted": 0.17123287671232879,
+   "subtree": 0.0,
+   "ngram": 0.304
+  },
+  "astScore": 0.1596931506849315,
+  "seq": 13,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.partial",
+  "stage": "ast",
+  "pairKey": "d5a1dadeece288d4",
+  "fileA": "b.py",
+  "fileB": "Original.java",
+  "astFeatures": {
+   "ted": 0.01851851851851849,
+   "subtree": 0.05,
+   "ngram": 0.11538461538461539
+  },
+  "astScore": 0.057022792022792014,
+  "seq": 14,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.partial",
+  "stage": "ast",
+  "pairKey": "248c32552d046d86",
+  "fileA": "b.py",
+  "fileB": "Renamed.java",
+  "astFeatures": {
+   "ted": 0.0,
+   "subtree": 0.07407407407407407,
+   "ngram": 0.1339712918660287
+  },
+  "astScore": 0.06241360978203083,
+  "seq": 15,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.partial",
+  "stage": "ast",
+  "pairKey": "672fe2434115fbad",
+  "fileA": "c.py",
+  "fileB": "Original.java",
+  "astFeatures": {
+   "ted": 0.013698630136986356,
+   "subtree": 0.0,
+   "ngram": 0.08130081300813008
+  },
+  "astScore": 0.029869695957233565,
+  "seq": 16,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.scored",
+  "stage": "final",
+  "pairKey": "593d24b50aa1f5e8",
+  "combinerVersion": "868d1803637d",
+  "fileA": "b.py",
+  "fileB": "c.py",
+  "languageA": "python",
+  "languageB": "python",
+  "score": 0.030590461224027993,
+  "threshold": 0.17657059265507694,
+  "verdict": "unlikely_plagiarism",
+  "detector": "combined",
+  "astScore": 0.1596931506849315,
+  "astFeatures": {
+   "ted": 0.17123287671232879,
+   "subtree": 0.0,
+   "ngram": 0.304
+  },
+  "neuralScore": 0.0006008827476762235,
+  "matches": [],
+  "warnings": [],
+  "seq": 17,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.scored",
+  "stage": "final",
+  "pairKey": "d5a1dadeece288d4",
+  "combinerVersion": "868d1803637d",
+  "fileA": "b.py",
+  "fileB": "Original.java",
+  "languageA": "python",
+  "languageB": "java",
+  "score": 0.02147953214174043,
+  "threshold": 0.17657059265507694,
+  "verdict": "unlikely_plagiarism",
+  "detector": "combined",
+  "astScore": 0.057022792022792014,
+  "astFeatures": {
+   "ted": 0.01851851851851849,
+   "subtree": 0.05,
+   "ngram": 0.11538461538461539
+  },
+  "neuralScore": 0.02490679733455181,
+  "matches": [
+   {
+    "linesA": [
+     9,
+     9
+    ],
+    "linesB": [
+     7,
+     7
+    ],
+    "size": 7,
+    "node": "ASSIGN"
+   }
+  ],
+  "warnings": [
+   "Comparing different languages (python vs java)."
+  ],
+  "seq": 18,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.scored",
+  "stage": "final",
+  "pairKey": "248c32552d046d86",
+  "combinerVersion": "868d1803637d",
+  "fileA": "b.py",
+  "fileB": "Renamed.java",
+  "languageA": "python",
+  "languageB": "java",
+  "score": 0.02453825408860697,
+  "threshold": 0.17657059265507694,
+  "verdict": "unlikely_plagiarism",
+  "detector": "combined",
+  "astScore": 0.06241360978203083,
+  "astFeatures": {
+   "ted": 0.0,
+   "subtree": 0.07407407407407407,
+   "ngram": 0.1339712918660287
+  },
+  "neuralScore": 0.023262139409780502,
+  "matches": [
+   {
+    "linesA": [
+     9,
+     9
+    ],
+    "linesB": [
+     9,
+     9
+    ],
+    "size": 8,
+    "node": "expression_statement"
+   }
+  ],
+  "warnings": [
+   "Comparing different languages (python vs java)."
+  ],
+  "seq": 19,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.scored",
+  "stage": "final",
+  "pairKey": "672fe2434115fbad",
+  "combinerVersion": "868d1803637d",
+  "fileA": "c.py",
+  "fileB": "Original.java",
+  "languageA": "python",
+  "languageB": "java",
+  "score": 0.014167582960771249,
+  "threshold": 0.17657059265507694,
+  "verdict": "unlikely_plagiarism",
+  "detector": "combined",
+  "astScore": 0.029869695957233565,
+  "astFeatures": {
+   "ted": 0.013698630136986356,
+   "subtree": 0.0,
+   "ngram": 0.08130081300813008
+  },
+  "neuralScore": 1.3366470739129e-05,
+  "matches": [],
+  "warnings": [
+   "Comparing different languages (python vs java)."
+  ],
+  "seq": 20,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "progress",
+  "done": 8,
+  "total": 10,
+  "seq": 21,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.partial",
+  "stage": "ast",
+  "pairKey": "28797b8e0e13763e",
+  "fileA": "c.py",
+  "fileB": "Renamed.java",
+  "astFeatures": {
+   "ted": 0.0273972602739726,
+   "subtree": 0.0,
+   "ngram": 0.09716599190283401
+  },
+  "astScore": 0.04010870168043924,
+  "seq": 22,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.partial",
+  "stage": "ast",
+  "pairKey": "87e3c2674c2d0c2d",
+  "fileA": "Original.java",
+  "fileB": "Renamed.java",
+  "astFeatures": {
+   "ted": 0.8095238095238095,
+   "subtree": 0.4931506849315068,
+   "ngram": 0.8097560975609757
+  },
+  "astScore": 0.7146815585572686,
+  "seq": 23,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.scored",
+  "stage": "final",
+  "pairKey": "28797b8e0e13763e",
+  "combinerVersion": "868d1803637d",
+  "fileA": "c.py",
+  "fileB": "Renamed.java",
+  "languageA": "python",
+  "languageB": "java",
+  "score": 0.014977229885739038,
+  "threshold": 0.17657059265507694,
+  "verdict": "unlikely_plagiarism",
+  "detector": "combined",
+  "astScore": 0.04010870168043924,
+  "astFeatures": {
+   "ted": 0.0273972602739726,
+   "subtree": 0.0,
+   "ngram": 0.09716599190283401
+  },
+  "neuralScore": 1.616168265172746e-05,
+  "matches": [],
+  "warnings": [
+   "Comparing different languages (python vs java)."
+  ],
+  "seq": 24,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "pair.scored",
+  "stage": "final",
+  "pairKey": "87e3c2674c2d0c2d",
+  "combinerVersion": "868d1803637d",
+  "fileA": "Original.java",
+  "fileB": "Renamed.java",
+  "languageA": "java",
+  "languageB": "java",
+  "score": 0.9950854679243618,
+  "threshold": 0.17657059265507694,
+  "verdict": "likely_plagiarism",
+  "detector": "combined",
+  "astScore": 0.7146815585572686,
+  "astFeatures": {
+   "ted": 0.8095238095238095,
+   "subtree": 0.4931506849315068,
+   "ngram": 0.8097560975609757
+  },
+  "neuralScore": 1.0,
+  "matches": [
+   {
+    "linesA": [
+     8,
+     8
+    ],
+    "linesB": [
+     8,
+     8
+    ],
+    "size": 13,
+    "node": "expression_statement"
+   },
+   {
+    "linesA": [
+     7,
+     7
+    ],
+    "linesB": [
+     9,
+     9
+    ],
+    "size": 7,
+    "node": "ASSIGN"
+   },
+   {
+    "linesA": [
+     14,
+     14
+    ],
+    "linesB": [
+     15,
+     15
+    ],
+    "size": 7,
+    "node": "object_creation_expression"
+   },
+   {
+    "linesA": [
+     1,
+     1
+    ],
+    "linesB": [
+     1,
+     1
+    ],
+    "size": 6,
+    "node": "import_declaration"
+   },
+   {
+    "linesA": [
+     6,
+     6
+    ],
+    "linesB": [
+     5,
+     5
+    ],
+    "size": 6,
+    "node": "local_variable_declaration"
+   }
+  ],
+  "warnings": [],
+  "seq": 25,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "progress",
+  "done": 10,
+  "total": 10,
+  "seq": 26,
+  "jobId": "36c868876d9b7742d77f"
+ },
+ {
+  "type": "job.completed",
+  "seconds": 1.0,
+  "flagged": 2,
+  "seq": 27,
+  "jobId": "36c868876d9b7742d77f"
+ }
+]

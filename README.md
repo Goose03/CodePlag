@@ -123,7 +123,7 @@ pre-commit run --all-files
 **4. Run in Docker**
 
 ```bash
-docker compose build codeplag
+docker compose build codeplag   # the CLI service lives in the "cli" profile
 docker compose run --rm codeplag --help
 docker compose run --rm codeplag version
 
@@ -135,6 +135,31 @@ docker compose --profile dev run --rm dev
 ```
 
 If Docker reports it cannot connect to `~/.docker/desktop/docker.sock`, run `docker context use default` and make sure the daemon is running (`sudo systemctl enable --now docker`).
+
+**4b. Web interface (upload files, live report in the same page)**
+
+```bash
+cp .env.example .env
+# Point CODEPLAG_CHECKPOINTS in .env at a folder with best.pt + combiner.json
+# (without it the worker falls back to the AST detector and the UI says so).
+docker compose up --build            # web: http://localhost:3000, API docs: http://localhost:8000/docs
+docker compose --profile gpu up      # optional CUDA worker (NVIDIA Container Toolkit)
+```
+
+Drag source files onto the page; pairs appear as they are scored (AST first, then the
+combined score), with summary, charts, filterable table, logs and a PDF. Design and
+architecture: [docs/architecture/web-report-viewer.md](docs/architecture/web-report-viewer.md).
+
+Without Docker (`pip install -e ".[web,web-dev]"` and a local Redis). Run the API and the
+worker from the repo root so `configs/` and `models/checkpoints/` resolve:
+
+```bash
+PYTHONPATH=web uvicorn api.main:app --reload      # API on :8000
+PYTHONPATH=web arq api.worker.WorkerSettings      # worker (another terminal)
+cd web && npm install && npm run dev              # web on :3000 (another terminal)
+pytest web/tests -o addopts=""                    # API tests
+cd web && npm test -- --run                       # frontend tests
+```
 
 **5. Prepare data and train**
 

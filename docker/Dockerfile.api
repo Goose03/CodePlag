@@ -1,0 +1,30 @@
+# Image for the web API and the worker (same code, different command).
+# ---------- builder ----------
+FROM python:3.12-slim AS builder
+ENV PIP_NO_CACHE_DIR=1 PIP_DISABLE_PIP_VERSION_CHECK=1
+RUN apt-get update && apt-get install -y --no-install-recommends build-essential \
+    && rm -rf /var/lib/apt/lists/*
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+WORKDIR /build
+COPY pyproject.toml README.md ./
+COPY src ./src
+ARG TORCH_INDEX=https://download.pytorch.org/whl/cpu
+RUN pip install torch --index-url ${TORCH_INDEX} \
+    && pip install ".[web]"
+
+# ---------- runtime ----------
+FROM python:3.12-slim AS runtime
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 \
+    PATH="/opt/venv/bin:$PATH" HF_HOME=/app/.cache/huggingface \
+    PYTHONPATH=/app/web CODEPLAG_WEB_JOBS_DIR=/data/jobs
+RUN useradd --create-home --uid 1000 appuser
+COPY --from=builder /opt/venv /opt/venv
+WORKDIR /app
+COPY configs ./configs
+COPY web/api ./web/api
+RUN mkdir -p /data/jobs /app/models/checkpoints /app/.cache/huggingface \
+    && chown -R appuser:appuser /app /data
+USER appuser
+EXPOSE 8000
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
